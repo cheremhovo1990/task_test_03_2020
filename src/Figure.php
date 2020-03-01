@@ -11,4 +11,17 @@ class Figure {
     public function __toString() {
         throw new \Exception("Not implemented");
     }
+
+    /**
+     * @return mixed
+     */
+    public function getIsBlack(): bool
+    {
+        return $this->isBlack;
+    }
+
+    public function equalIsBack(bool $bool): bool
+    {
+        return $this->isBlack === $bool;
+    }
 }

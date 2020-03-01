@@ -1,8 +1,11 @@
 <?php
 
 class Desk {
-    private $figures = [];
 
+    private $isNewBatch = true;
+    private $isStepBack;
+    private $figures = [];
+    
     public function __construct() {
         $this->figures['a'][1] = new Rook(false);
         $this->figures['b'][1] = new Knight(false);
@@ -52,9 +55,12 @@ class Desk {
         $yTo   = $match[4];
 
         if (isset($this->figures[$xFrom][$yFrom])) {
+            $this->setFirstStep($this->figures[$xFrom][$yFrom]);
             $this->figures[$xTo][$yTo] = $this->figures[$xFrom][$yFrom];
+            $this->nextStep($this->figures[$xFrom][$yFrom]);
         }
         unset($this->figures[$xFrom][$yFrom]);
+        $this->isNewBatch = false;
     }
 
     public function dump() {
@@ -71,4 +77,23 @@ class Desk {
         }
         echo "  abcdefgh\n";
     }
+
+    private function setFirstStep(Figure $figure)
+    {
+        if ($this->isNewBatch) {
+            $this->isStepBack = $figure->getIsBlack();
+        }
+    }
+
+    private function nextStep(Figure $figure)
+    {
+        if (!$this->isNewBatch) {
+            if ($figure->equalIsBack($this->isStepBack)) {
+                throw new DomainException('Не ваш ход');
+            } else {
+                $this->isStepBack = $figure->getIsBlack();
+            }
+        }
+    }
+
 }
