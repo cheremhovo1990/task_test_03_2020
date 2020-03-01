@@ -7,41 +7,41 @@ class Desk {
     private $figures = [];
     
     public function __construct() {
-        $this->figures['a'][1] = new Rook(false);
-        $this->figures['b'][1] = new Knight(false);
-        $this->figures['c'][1] = new Bishop(false);
-        $this->figures['d'][1] = new Queen(false);
-        $this->figures['e'][1] = new King(false);
-        $this->figures['f'][1] = new Bishop(false);
-        $this->figures['g'][1] = new Knight(false);
-        $this->figures['h'][1] = new Rook(false);
+        $this->figures['a'][1] = new Rook(false, $this);
+        $this->figures['b'][1] = new Knight(false, $this);
+        $this->figures['c'][1] = new Bishop(false, $this);
+        $this->figures['d'][1] = new Queen(false, $this);
+        $this->figures['e'][1] = new King(false, $this);
+        $this->figures['f'][1] = new Bishop(false, $this);
+        $this->figures['g'][1] = new Knight(false, $this);
+        $this->figures['h'][1] = new Rook(false, $this);
 
-        $this->figures['a'][2] = new Pawn(false);
-        $this->figures['b'][2] = new Pawn(false);
-        $this->figures['c'][2] = new Pawn(false);
-        $this->figures['d'][2] = new Pawn(false);
-        $this->figures['e'][2] = new Pawn(false);
-        $this->figures['f'][2] = new Pawn(false);
-        $this->figures['g'][2] = new Pawn(false);
-        $this->figures['h'][2] = new Pawn(false);
+        $this->figures['a'][2] = new Pawn(false, $this);
+        $this->figures['b'][2] = new Pawn(false, $this);
+        $this->figures['c'][2] = new Pawn(false, $this);
+        $this->figures['d'][2] = new Pawn(false, $this);
+        $this->figures['e'][2] = new Pawn(false, $this);
+        $this->figures['f'][2] = new Pawn(false, $this);
+        $this->figures['g'][2] = new Pawn(false, $this);
+        $this->figures['h'][2] = new Pawn(false, $this);
 
-        $this->figures['a'][7] = new Pawn(true);
-        $this->figures['b'][7] = new Pawn(true);
-        $this->figures['c'][7] = new Pawn(true);
-        $this->figures['d'][7] = new Pawn(true);
-        $this->figures['e'][7] = new Pawn(true);
-        $this->figures['f'][7] = new Pawn(true);
-        $this->figures['g'][7] = new Pawn(true);
-        $this->figures['h'][7] = new Pawn(true);
+        $this->figures['a'][7] = new Pawn(true, $this);
+        $this->figures['b'][7] = new Pawn(true, $this);
+        $this->figures['c'][7] = new Pawn(true, $this);
+        $this->figures['d'][7] = new Pawn(true, $this);
+        $this->figures['e'][7] = new Pawn(true, $this);
+        $this->figures['f'][7] = new Pawn(true, $this);
+        $this->figures['g'][7] = new Pawn(true, $this);
+        $this->figures['h'][7] = new Pawn(true, $this);
 
-        $this->figures['a'][8] = new Rook(true);
-        $this->figures['b'][8] = new Knight(true);
-        $this->figures['c'][8] = new Bishop(true);
-        $this->figures['d'][8] = new Queen(true);
-        $this->figures['e'][8] = new King(true);
-        $this->figures['f'][8] = new Bishop(true);
-        $this->figures['g'][8] = new Knight(true);
-        $this->figures['h'][8] = new Rook(true);
+        $this->figures['a'][8] = new Rook(true, $this);
+        $this->figures['b'][8] = new Knight(true, $this);
+        $this->figures['c'][8] = new Bishop(true, $this);
+        $this->figures['d'][8] = new Queen(true, $this);
+        $this->figures['e'][8] = new King(true, $this);
+        $this->figures['f'][8] = new Bishop(true, $this);
+        $this->figures['g'][8] = new Knight(true, $this);
+        $this->figures['h'][8] = new Rook(true, $this);
     }
 
     public function move($move) {
@@ -53,14 +53,18 @@ class Desk {
         $yFrom = $match[2];
         $xTo   = $match[3];
         $yTo   = $match[4];
-
+        $this->verifyY($yFrom);
+        $this->verifyY($yTo);
         if (isset($this->figures[$xFrom][$yFrom])) {
-            $this->setFirstStep($this->figures[$xFrom][$yFrom]);
-            $this->figures[$xTo][$yTo] = $this->figures[$xFrom][$yFrom];
-            $this->nextStep($this->figures[$xFrom][$yFrom]);
+            /** @var $figure Figure */
+            $figure = $this->figures[$xFrom][$yFrom];
+            $this->nextStep($figure);
+            $this->setFirstStep($figure);
+            $figure->verifyNextStep($xFrom, $yFrom, $xTo, $yTo);
+            $this->figures[$xTo][$yTo] = $figure;
+            $this->isNewBatch = false;
         }
         unset($this->figures[$xFrom][$yFrom]);
-        $this->isNewBatch = false;
     }
 
     public function dump() {
@@ -76,6 +80,11 @@ class Desk {
             echo "\n";
         }
         echo "  abcdefgh\n";
+    }
+
+    public function getFigure($x, $y): ?Figure
+    {
+        return $this->figures[$x][$y]??null;
     }
 
     private function setFirstStep(Figure $figure)
@@ -96,4 +105,15 @@ class Desk {
         }
     }
 
+    public function verifyY($y)
+    {
+        if (!in_array($y, [1,2,3,4,5,6,7,8])) {
+            throw new DomainException("Не верный ход по y \"$y\"");
+        }
+    }
+
+    public function throwException($message)
+    {
+        throw new DomainException($message);
+    }
 }
